@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:untitled/authentication/login_screen.dart';
+import 'package:untitled/authentication/screens/login_screen.dart';
 import 'authentication/view_model/login_view_model.dart';
 import 'home/view_models/product_view_model.dart';
 import 'home/view_models/profile_view_model.dart'; // Import your ViewModel
