@@ -10,7 +10,7 @@ class ProfileViewModel extends ChangeNotifier {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController currentPasswordController = TextEditingController();
   final TextEditingController newPasswordController = TextEditingController();
-
+  ProductViewModel? cachedViewModel;
   File? profileImage;
   bool isLoading = false;
 
@@ -24,8 +24,8 @@ class ProfileViewModel extends ChangeNotifier {
 
     if (pickedFile != null) {
         profileImage = File(pickedFile.path); // Your image picking logic
-        context.read<ProductViewModel>().setProfileImage(profileImage!);
-
+        cachedViewModel?.setProfileImage(profileImage!);
+        notifyListeners();
     }
     notifyListeners();
   }

@@ -3,65 +3,25 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:untitled/home/view_models/product_view_model.dart';
 import 'package:provider/provider.dart';
+import 'package:untitled/home/view_models/profile_view_model.dart';
 class ProfileScreen extends StatefulWidget {
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _currentPasswordController = TextEditingController();
-  final TextEditingController _newPasswordController = TextEditingController();
 
-  File? _profileImage;
-  bool _isLoading = false;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
 
+    context.read<ProfileViewModel>().cachedViewModel = context.read<ProductViewModel>();
+  }
   @override
   void initState() {
     super.initState();
     // Load initial user data
-    _loadUserData();
-  }
-
-  void _loadUserData() {
-    // Replace with your actual user data loading logic
-    setState(() {
-      _usernameController.text = 'CurrentUsername';
-    });
-  }
-
-  Future<void> _pickImage(ImageSource source) async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: source);
-
-    if (pickedFile != null) {
-      setState(() {
-        _profileImage = File(pickedFile.path); // Your image picking logic
-        context.read<ProductViewModel>().setProfileImage(_profileImage!);
-      });
-    }
-  }
-
-  Future<void> _updateProfile() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() => _isLoading = true);
-
-    try {
-      // Replace with your actual profile update logic
-      await Future.delayed(Duration(seconds: 2)); // Simulate network request
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Profile updated successfully!')),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update profile: $e')),
-      );
-    } finally {
-      setState(() => _isLoading = false);
-    }
+    context.read<ProfileViewModel>().loadUserData();
   }
 
   @override
@@ -72,18 +32,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
         actions: [
           IconButton(
             icon: Icon(Icons.save),
-            onPressed:(){_updateProfile();
+            onPressed:(){context.read<ProfileViewModel>().updateProfile(context);
             Navigator.pop(context);
     },
           ),
         ],
       ),
-      body: _isLoading
+      body: context.read<ProfileViewModel>().isLoading
           ? Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: Form(
-          key: _formKey,
+          key: context.read<ProfileViewModel>().formKey,
           child: Column(
             children: [
               _buildProfilePicture(),
@@ -130,7 +90,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildUsernameField() {
     return TextFormField(
-      controller: _usernameController,
+      controller: context.read<ProfileViewModel>().usernameController,
       decoration: InputDecoration(
         labelText: 'Username',
         prefixIcon: Icon(Icons.person),
@@ -152,7 +112,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Column(
       children: [
         TextFormField(
-          controller: _currentPasswordController,
+          controller: context.read<ProfileViewModel>().currentPasswordController,
           obscureText: true,
           decoration: InputDecoration(
             labelText: 'Current Password',
@@ -168,7 +128,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         SizedBox(height: 16),
         TextFormField(
-          controller: _newPasswordController,
+          controller: context.read<ProfileViewModel>().newPasswordController,
           obscureText: true,
           decoration: InputDecoration(
             labelText: 'New Password (optional)',
@@ -189,7 +149,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildSaveButton() {
     return ElevatedButton(
       onPressed:(){
-        _updateProfile();
+        context.read<ProfileViewModel>().updateProfile(context);
         Navigator.pop(context);
       } ,
       style: ElevatedButton.styleFrom(
@@ -209,7 +169,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Text('Camera'),
             onPressed: () async {
               Navigator.pop(context);
-              _pickImage(ImageSource.camera);
+              context.read<ProfileViewModel>().pickImage( context ,ImageSource.camera);
 
             },
           ),
@@ -217,7 +177,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Text('Gallery'),
             onPressed: () {
               Navigator.pop(context);
-              _pickImage(ImageSource.gallery);
+              context.read<ProfileViewModel>().pickImage( context ,ImageSource.gallery);
             },
           ),
         ],
@@ -225,11 +185,5 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  @override
-  void dispose() {
-    _usernameController.dispose();
-    _currentPasswordController.dispose();
-    _newPasswordController.dispose();
-    super.dispose();
-  }
+
 }
